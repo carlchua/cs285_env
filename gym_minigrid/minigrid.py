@@ -662,7 +662,7 @@ class MiniGridEnv(gym.Env):
         self.actions = MiniGridEnv.Actions
 
         # converged seen grid -- 1 if covered else 0
-        self.seen_grid = [[0]*width]*height
+        self.seen_grid = [[0]*width for _ in range(height)]
 
         # Total viewed
         self.viewed = 0
@@ -670,10 +670,10 @@ class MiniGridEnv(gym.Env):
         self.target = width*height
 
         # previous seen grid -- 1 if seen else 0
-        self.prev_grid = [[0]*width]*height
+        self.prev_grid = [[0]*width for _ in range(height)]
 
         # current seen grid -- 1 if seen else 0
-        self.curr_grid = [[0]*width]*height
+        self.curr_grid = [[0]*width for _ in range(height)]
 
         # Actions are discrete integer values
         self.action_space = spaces.Discrete(len(self.actions))
@@ -834,30 +834,30 @@ class MiniGridEnv(gym.Env):
         reward_val = 0
         topX, topY, botX, botY = self.get_view_exts()
         height, width = self.agent_view_size, self.agent_view_size
+        self.curr_grid = [[0]*self.width for _ in range(self.height)]
         for i in range(height):
             for j in range(width):
                 x = i + topX
                 y = j + topY
-                if x>=0 and x<self.height and y>=0 and y<self.width:
+                if x>0 and x<self.height-1 and y>0 and y<self.width-1:
                     self.curr_grid[x][y] = 1
                     # compare prev and curr to search for overlap
                     if (self.prev_grid[x][y] == 1):
                         # overlap detected
                         continue
-                    elif (self.prev_grid[x][y] == 0):
+                    elif (self.prev_grid[x][y] == 0 ):
                         # no overlap and new cover ground
-                        if self.seen_grid[x][y] == 1: # update seen grid
+                        if self.seen_grid[x][y] == 1:
                             reward_val -= 0.5
                         else:
                             self.seen_grid[x][y] = 1
                             reward_val += 1
                             self.viewed += 1
 
-        self.prev_grid = self.curr_grid # update prev with curr
+        self.prev_grid = self.curr_grid.copy() # update prev with curr
 
-        # PENALIZE DISTANCE
-        return 1 - 0.9 * (self.max_steps / self.step_count) + reward_val
-        ############## RAY ###################
+        return reward_val
+
 
     def _rand_int(self, low, high):
         """
@@ -1144,19 +1144,19 @@ class MiniGridEnv(gym.Env):
 
         # Rotate left
         if action == self.actions.left:
+            reward = self._reward()
             self.agent_dir -= 1
             if self.agent_dir < 0:
                 self.agent_dir += 4
             if self.viewed == self.target:
                 done = True
-                reward = self._reward()
 
         # Rotate right
         elif action == self.actions.right:
+            reward = self._reward()
             self.agent_dir = (self.agent_dir + 1) % 4
             if self.viewed == self.target:
                 done = True
-                reward = self._reward()
 
         # Move forward
         elif action == self.actions.forward:
@@ -1164,6 +1164,7 @@ class MiniGridEnv(gym.Env):
             self.step_count += 1
             if fwd_cell == None or fwd_cell.can_overlap():
                 self.agent_pos = fwd_pos
+                reward = self._reward()
             if fwd_cell != None and fwd_cell.type == 'goal':
                 done = True
                 reward = self._reward()

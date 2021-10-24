@@ -52,7 +52,7 @@ class DynamicObstaclesEnv(MiniGridEnv):
             self.obstacles.append(Ball())
             self.place_obj(self.obstacles[i_obst], max_tries=100)
 
-        self.mission = "View Every Tile"
+        self.mission = "View Every Tile. Current Viewed: " + str(self.viewed)
 
     def step(self, action):
         # Invalid action
