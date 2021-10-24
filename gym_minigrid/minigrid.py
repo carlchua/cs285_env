@@ -852,7 +852,6 @@ class MiniGridEnv(gym.Env):
                             self.seen_grid[x][y] = 1
                             reward_val += 1
                             self.viewed += 1
-                    else:
 
         self.prev_grid = self.curr_grid # update prev with curr
 
