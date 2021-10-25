@@ -741,6 +741,20 @@ class MiniGridEnv(gym.Env):
         # Step count since episode start
         self.step_count = 0
 
+        # converged seen grid -- 1 if covered else 0
+        self.seen_grid = [[0]*self.width for _ in range(self.height)]
+
+        # Total viewed
+        self.viewed = 0
+        # Target to view
+        self.target = self.width*self.height
+
+        # previous seen grid -- 1 if seen else 0
+        self.prev_grid = [[0]*self.width for _ in range(self.height)]
+
+        # current seen grid -- 1 if seen else 0
+        self.curr_grid = [[0]*self.width for _ in range(self.height)]
+
         # Return first observation
         obs = self.gen_obs()
         return obs
@@ -839,7 +853,7 @@ class MiniGridEnv(gym.Env):
             for j in range(width):
                 x = i + topX
                 y = j + topY
-                if x>0 and x<self.height-1 and y>0 and y<self.width-1:
+                if x>=0 and x<self.height and y>=0 and y<self.width:
                     self.curr_grid[x][y] = 1
                     # compare prev and curr to search for overlap
                     if (self.prev_grid[x][y] == 1):

@@ -52,7 +52,7 @@ class DynamicObstaclesEnv(MiniGridEnv):
             self.obstacles.append(Ball())
             self.place_obj(self.obstacles[i_obst], max_tries=100)
 
-        self.mission = "View Every Tile. Current Viewed: " + str(self.viewed)
+        self.mission = "View Every Tile"
 
     def step(self, action):
         # Invalid action
@@ -79,8 +79,8 @@ class DynamicObstaclesEnv(MiniGridEnv):
 
         # If the agent tried to walk over an obstacle or wall
         if action == self.actions.forward and not_clear:
-            reward = -1
-            done = True
+            # PENALTY FOR COLLISION
+            reward = -10
             return obs, reward, done, info
 
         return obs, reward, done, info
@@ -104,6 +104,10 @@ class DynamicObstaclesRandomEnv6x6(DynamicObstaclesEnv):
 class DynamicObstaclesEnv16x16(DynamicObstaclesEnv):
     def __init__(self):
         super().__init__(size=16, n_obstacles=8)
+
+class DynamicObstaclesEnv24x24(DynamicObstaclesEnv):
+    def __init__(self):
+        super().__init__(size=24, n_obstacles=8)
 
 register(
     id='MiniGrid-Dynamic-Obstacles-5x5-v0',
@@ -133,4 +137,9 @@ register(
 register(
     id='MiniGrid-Dynamic-Obstacles-16x16-v0',
     entry_point='gym_minigrid.envs:DynamicObstaclesEnv16x16'
+)
+
+register(
+    id='MiniGrid-Dynamic-Obstacles-24x24-v0',
+    entry_point='gym_minigrid.envs:DynamicObstaclesEnv24x24'
 )
