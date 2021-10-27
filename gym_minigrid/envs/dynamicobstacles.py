@@ -18,10 +18,11 @@ class DynamicObstaclesEnv(MiniGridEnv):
         self.agent_start_dir = agent_start_dir
 
         # Reduce obstacles if there are too many
-        if n_obstacles <= size/2 + 1:
-            self.n_obstacles = int(n_obstacles)
-        else:
-            self.n_obstacles = int(size/2)
+        self.n_obstacles = int(n_obstacles)
+        # if n_obstacles <= size/2 + 1:
+        #     self.n_obstacles = int(n_obstacles)
+        # else:
+        #     self.n_obstacles = int(size/2)
         super().__init__(
             grid_size=size,
             max_steps=4 * size * size,
@@ -107,7 +108,7 @@ class DynamicObstaclesEnv16x16(DynamicObstaclesEnv):
 
 class DynamicObstaclesEnv24x24(DynamicObstaclesEnv):
     def __init__(self):
-        super().__init__(size=24, n_obstacles=8)
+        super().__init__(size=24, n_obstacles=100)
 
 register(
     id='MiniGrid-Dynamic-Obstacles-5x5-v0',

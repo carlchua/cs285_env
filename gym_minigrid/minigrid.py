@@ -6,6 +6,7 @@ import numpy as np
 from gym import error, spaces, utils
 from gym.utils import seeding
 from .rendering import *
+import torch_ac
 
 # Size in pixels of a tile in the full-scale human view
 TILE_PIXELS = 32
