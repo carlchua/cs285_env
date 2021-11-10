@@ -988,19 +988,28 @@ class MiniGridEnv(gym.Env):
             else:
                 # choose a direction
                 while True:
+                    # print(1)
                     # while true to make sure it satisfy both conditions
                     dir = self._rand_int(1,4)
-                    if (dir == 1 and not np.array_equal(self.agent_pos, obs_global_pos[0] - 1)): # UP
-                        obs_global_pos[0] = obs_global_pos[0] - 1
+
+                    dir_1 = obs_global_pos[0] - 1
+                    if (dir == 1 and not np.array_equal(self.agent_pos, dir_1)) and dir_1 > 0 and dir_1 < self.grid.height: # UP
+                        obs_global_pos[0] = dir_1
                         break
-                    if (dir == 2 and not np.array_equal(self.agent_pos, obs_global_pos[0] + 1)): # DOWN
-                        obs_global_pos[0] = obs_global_pos[0] + 1
+
+                    dir_2 = obs_global_pos[0] + 1
+                    if (dir == 2 and not np.array_equal(self.agent_pos, dir_2)) and dir_2 >= 0 and dir_2 < self.grid.height: # DOWN
+                        obs_global_pos[0] = dir_2
                         break
-                    if (dir == 3 and not np.array_equal(self.agent_pos, obs_global_pos[1] - 1)): # LEFT
-                        obs_global_pos[0] = obs_global_pos[1] - 1
+
+                    dir_3 = obs_global_pos[1] - 1
+                    if (dir == 3 and not np.array_equal(self.agent_pos, dir_3)) and dir_3 >= 0 and dir_3 <  self.grid.width: # LEFT
+                        obs_global_pos[0] = dir_3
                         break
-                    if (dir == 4 and not np.array_equal(self.agent_pos, obs_global_pos[1] + 1)): # RIGHT
-                        obs_global_pos[0] = obs_global_pos[1] + 1
+
+                    dir_4 = obs_global_pos[1] + 1
+                    if (dir == 4 and not np.array_equal(self.agent_pos, dir_4)) and dir_4 >= 0 and dir_4 < self.grid.width: # RIGHT
+                        obs_global_pos[0] = dir_4
                         break
                 pos = obs_global_pos
 
