@@ -8,6 +8,11 @@ from gym.utils import seeding
 from .rendering import *
 import torch_ac
 
+### CHANGED RAY ###
+random_obs_start_switch = 0
+obs_global_pos = 0
+### CHANGED RAY ###
+
 # Size in pixels of a tile in the full-scale human view
 TILE_PIXELS = 32
 
@@ -969,26 +974,51 @@ class MiniGridEnv(gym.Env):
                 raise RecursionError('rejection sampling failed in place_obj')
 
             num_tries += 1
+            ### CHANGE RAY ###
+            global random_obs_start_switch
+            global obs_global_pos
 
-            pos = np.array((
-                self._rand_int(top[0], min(top[0] + size[0], self.grid.width)),
-                self._rand_int(top[1], min(top[1] + size[1], self.grid.height))
-            ))
+            if not random_obs_start_switch:
+                pos = np.array((
+                    self._rand_int(top[0], min(top[0] + size[0], self.grid.width)),
+                    self._rand_int(top[1], min(top[1] + size[1], self.grid.height))
+                ))
+                obs_global_pos = pos
+                random_obs_start_switch = 1
+            else:
+                # choose a direction
+                while True:
+                    # while true to make sure it satisfy both conditions
+                    dir = self._rand_int(1,4)
+                    if (dir == 1 and not np.array_equal(self.agent_pos, obs_global_pos[0] - 1)): # UP
+                        obs_global_pos[0] = obs_global_pos[0] - 1
+                        break
+                    if (dir == 2 and not np.array_equal(self.agent_pos, obs_global_pos[0] + 1)): # DOWN
+                        obs_global_pos[0] = obs_global_pos[0] + 1
+                        break
+                    if (dir == 3 and not np.array_equal(self.agent_pos, obs_global_pos[1] - 1)): # LEFT
+                        obs_global_pos[0] = obs_global_pos[1] - 1
+                        break
+                    if (dir == 4 and not np.array_equal(self.agent_pos, obs_global_pos[1] + 1)): # RIGHT
+                        obs_global_pos[0] = obs_global_pos[1] + 1
+                        break
+                pos = obs_global_pos
 
             # Don't place the object on top of another object
-            if self.grid.get(*pos) != None:
-                continue
+            # if self.grid.get(*pos) != None:
+            #     continue
 
             # Don't place the object where the agent is
-            if np.array_equal(pos, self.agent_pos):
-                continue
+            # if np.array_equal(pos, self.agent_pos):
+            #     print('============B')
+            #     continue
 
             # Check if there is a filtering criterion
-            if reject_fn and reject_fn(self, pos):
-                continue
+            # if reject_fn and reject_fn(self, pos):
+            #     print('============C')
+            #     continue
 
             break
-
         self.grid.set(*pos, obj)
 
         if obj is not None:
