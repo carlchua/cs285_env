@@ -16,6 +16,7 @@ class DynamicObstaclesEnv(MiniGridEnv):
     ):
         self.agent_start_pos = agent_start_pos
         self.agent_start_dir = agent_start_dir
+        self.move = False
 
         # Reduce obstacles if there are too many
         self.n_obstacles = int(n_obstacles)
@@ -51,7 +52,7 @@ class DynamicObstaclesEnv(MiniGridEnv):
         self.obstacles = []
         for i_obst in range(self.n_obstacles):
             self.obstacles.append(Ball())
-            self.place_obj(self.obstacles[i_obst], max_tries=100)
+            self.place_obj(self.obstacles[i_obst], top=(2,2), size=(self.grid.width-4,self.grid.height-4), max_tries=100)
 
         self.mission = "View Every Tile"
 
@@ -65,23 +66,34 @@ class DynamicObstaclesEnv(MiniGridEnv):
         not_clear = front_cell and front_cell.type != 'goal'
 
         # Update obstacle positions
-        for i_obst in range(len(self.obstacles)):
-            old_pos = self.obstacles[i_obst].cur_pos
-            top = tuple(map(add, old_pos, (-1, -1)))
+        if self.move:
+            for i_obst in range(len(self.obstacles)):
+                old_pos = self.obstacles[i_obst].cur_pos
+                top = tuple(map(add, old_pos, (1, 0)))
 
-            try:
-                self.place_obj(self.obstacles[i_obst], top=top, size=(3,3), max_tries=100)
-                self.grid.set(*old_pos, None)
-            except:
-                pass
+                try:
+                    new_pos = self.place_obj(self.obstacles[i_obst], top=top, size=(1,1), max_tries=100)
+                    self.grid.set(*old_pos, None)
+
+                    # If obstacle is at edge, remove and respawn at the side
+                    if new_pos[1] >= self.grid.width-2 or new_pos[0] >= self.grid.height-2:
+                        print("hello")
+                        self.place_obj(self.obstacles[i_obst], top=(1,1), size=(1,self.grid.height-3), max_tries=100)
+                        self.grid.set(*new_pos, None)
+                except:
+                    pass
+            self.move = False
+        elif not self.move:
+            self.move = True
+
 
         # Update the agent's position/direction
         obs, reward, done, info = MiniGridEnv.step(self, action)
 
-        # If the agent tried to walk over an obstacle or wall
+        # If the agent walked over an obstacle or wall
         if action == self.actions.forward and not_clear:
             # PENALTY FOR COLLISION
-            reward = -10
+            reward = -20
             return obs, reward, done, info
 
         return obs, reward, done, info
