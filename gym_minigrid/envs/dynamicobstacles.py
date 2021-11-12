@@ -77,7 +77,7 @@ class DynamicObstaclesEnv(MiniGridEnv):
 
                     # If obstacle is at edge, remove and respawn at the side
                     if new_pos[1] >= self.grid.width-2 or new_pos[0] >= self.grid.height-2:
-                        print("hello")
+                        # print("hello")
                         self.place_obj(self.obstacles[i_obst], top=(1,1), size=(1,self.grid.height-3), max_tries=100)
                         self.grid.set(*new_pos, None)
                 except:
@@ -120,7 +120,7 @@ class DynamicObstaclesEnv16x16(DynamicObstaclesEnv):
 
 class DynamicObstaclesEnv24x24(DynamicObstaclesEnv):
     def __init__(self):
-        super().__init__(size=24, n_obstacles=100)
+        super().__init__(size=24, n_obstacles=25)
 
 register(
     id='MiniGrid-Dynamic-Obstacles-5x5-v0',
