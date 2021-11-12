@@ -69,6 +69,8 @@ class DynamicObstaclesEnv(MiniGridEnv):
         if self.move:
             for i_obst in range(len(self.obstacles)):
                 old_pos = self.obstacles[i_obst].cur_pos
+                #UP = (0, -1)
+                #RIGHT = (1, 0)
                 top = tuple(map(add, old_pos, (1, 0)))
 
                 try:
@@ -76,8 +78,11 @@ class DynamicObstaclesEnv(MiniGridEnv):
                     self.grid.set(*old_pos, None)
 
                     # If obstacle is at edge, remove and respawn at the side
-                    if new_pos[1] >= self.grid.width-2 or new_pos[0] >= self.grid.height-2:
-                        # print("hello")
+                    if new_pos[0] >= self.grid.width-2 or new_pos[1] <= 1:
+                        # UP moving clouds
+                        # self.place_obj(self.obstacles[i_obst], top=(1,self.grid.height-2), size=(self.grid.width-3, 1), max_tries=100)
+
+                        # RIGHT moving clouds
                         self.place_obj(self.obstacles[i_obst], top=(1,1), size=(1,self.grid.height-3), max_tries=100)
                         self.grid.set(*new_pos, None)
                 except:

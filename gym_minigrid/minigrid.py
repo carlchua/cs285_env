@@ -885,24 +885,15 @@ class MiniGridEnv(gym.Env):
 
         return reward_val
 
-### ONLY ON TOP TILE ###
-    # def _reward(self):
-    #     reward_val = 0
-    #     topX, topY, botX, botY = self.get_view_exts()
-    #     height, width = self.agent_view_size, self.agent_view_size
-    #     self.curr_grid = [[0]*self.width for _ in range(self.height)]
-    #     for i in range(height):
-    #         for j in range(width):
-    #             x = i + topX
-    #             y = j + topY
-    #             if x>=0 and x<self.height and y>=0 and y<self.width:
-    #                 if self.covered_grid[x][y] == 1:
-    #                     reward_val -= 0.5
-    #                 else:
-    #                     reward_val += 3
-    #                 self.covered_grid[x][y] = 1
+# ### ONLY ON TOP TILE ###
+#     def _reward(self):
+#         reward_val = 0
+#         if self.covered_grid[self.agent_pos[0]][self.agent_pos[1]] == 1:
+#             reward_val -= 0.5
+#         else:
+#             reward_val += 3
+#         return reward_val
 
-    #     return reward_val
 
 
     def _rand_int(self, low, high):
