@@ -668,6 +668,9 @@ class MiniGridEnv(gym.Env):
             width = grid_size
             height = grid_size
 
+        # Timesteps
+        self.time_count = 0
+
         # Action enumeration for this environment
         self.actions = MiniGridEnv.Actions
 
@@ -734,6 +737,7 @@ class MiniGridEnv(gym.Env):
         # Current position and direction of the agent
         self.agent_pos = None
         self.agent_dir = None
+        self.time_count = 0
 
         # Generate a new random grid at the start of each episode
         # To keep the same grid for each episode, call env.seed() with
@@ -883,7 +887,9 @@ class MiniGridEnv(gym.Env):
 
         self.prev_grid = self.curr_grid.copy() # update prev with curr
 
-        return reward_val
+        discount_factor = 0.995**self.time_count
+
+        return discount_factor*reward_val
 
 # ### ONLY ON TOP TILE ###
 #     def _reward(self):
@@ -1172,6 +1178,7 @@ class MiniGridEnv(gym.Env):
 
         reward = 0
         done = False
+        self.time_count += 1
 
         # Get the position in front of the agent
         fwd_pos = self.front_pos
