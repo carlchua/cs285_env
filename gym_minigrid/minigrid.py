@@ -670,7 +670,6 @@ class MiniGridEnv(gym.Env):
 
         # Timesteps
         self.time_count = 0
-
         # Action enumeration for this environment
         self.actions = MiniGridEnv.Actions
 
@@ -887,9 +886,7 @@ class MiniGridEnv(gym.Env):
 
         self.prev_grid = self.curr_grid.copy() # update prev with curr
 
-        discount_factor = 0.995**self.time_count
-
-        return discount_factor*reward_val
+        return reward_val
 
 # ### ONLY ON TOP TILE ###
 #     def _reward(self):
