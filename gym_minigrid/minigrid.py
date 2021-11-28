@@ -703,7 +703,7 @@ class MiniGridEnv(gym.Env):
         self.observation_space = spaces.Box(
             low=0,
             high=255,
-            shape=(self.agent_view_size, self.agent_view_size, 3),
+            shape=(height - 2,width - 2, 3), #entire grid view
             dtype='uint8'
         )
         self.observation_space = spaces.Dict({
@@ -1321,7 +1321,7 @@ class MiniGridEnv(gym.Env):
 
         topX, topY, botX, botY = self.get_view_exts()
 
-        grid = self.grid.slice(topX, topY, self.agent_view_size, self.agent_view_size)
+        grid = self.grid.slice(topX, topY, self.height - 2, self.width - 2)#self.agent_view_size, self.agent_view_size) ##ENTIRE GRID VIEW
 
         for i in range(self.agent_dir + 1):
             grid = grid.rotate_left()
@@ -1332,7 +1332,6 @@ class MiniGridEnv(gym.Env):
             vis_mask = grid.process_vis(agent_pos=(self.agent_view_size // 2 , self.agent_view_size - 1))
         else:
             vis_mask = np.ones(shape=(grid.width, grid.height), dtype=np.bool)
-
         # Make it so the agent sees what it's carrying
         # We do this by placing the carried object at the agent's position
         # in the agent's partially observable view
@@ -1341,7 +1340,6 @@ class MiniGridEnv(gym.Env):
             grid.set(*agent_pos, self.carrying)
         else:
             grid.set(*agent_pos, None)
-
         return grid, vis_mask
 
     def gen_obs(self):
@@ -1353,7 +1351,7 @@ class MiniGridEnv(gym.Env):
 
         # Encode the partially observable view into a numpy array
         image = grid.encode(vis_mask)
-
+        # print('image',image.shape)
         assert hasattr(self, 'mission'), "environments must define a textual mission string"
 
         # Observations are dictionaries containing:
