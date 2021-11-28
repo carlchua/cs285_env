@@ -1028,7 +1028,9 @@ class MiniGridEnv(gym.Env):
         top=None,
         size=None,
         reject_fn=None,
-        max_tries=math.inf
+        max_tries=math.inf,
+        line=False,
+        line_example=None
     ):
         """
         Place an object at an empty position in the grid
@@ -1036,7 +1038,6 @@ class MiniGridEnv(gym.Env):
         :param size: size of the rectangle where to place
         :param reject_fn: function to filter out potential positions
         """
-
         if top is None:
             top = (0, 0)
         else:
@@ -1046,6 +1047,7 @@ class MiniGridEnv(gym.Env):
             size = (self.grid.width, self.grid.height)
 
         num_tries = 0
+
         while True:
             # This is to handle with rare cases where rejection sampling
             # gets stuck in an infinite loop
@@ -1053,13 +1055,15 @@ class MiniGridEnv(gym.Env):
                 raise RecursionError('rejection sampling failed in place_obj')
 
             num_tries += 1
-            print(top[0],top[1],min(top[0] + size[0], self.grid.width),min(top[1] + size[1], self.grid.height))
+
             pos = np.array((
                 self._rand_int(top[0], min(top[0] + size[0], self.grid.width)),
                 self._rand_int(top[1], min(top[1] + size[1], self.grid.height))
             ))
-            pos = np.array((1,1))
-
+            if line:
+                lst = [[3,1],[3,2],[3,3],[3,4],[3,5],[3,6],[3,7],[3,8],[3,9],[3,10],[3,11],[3,12],[3,13],[3,14],[3,15],[3,16],[3,17],[3,18],[3,19],[3,20]]
+                pos = np.array(lst[line_example])
+                # print("line")
             # Don't place the object on top of another object
             # if self.grid.get(*pos) != None:
             #     continue
@@ -1071,7 +1075,6 @@ class MiniGridEnv(gym.Env):
             # Check if there is a filtering criterion
             if reject_fn and reject_fn(self, pos):
                 continue
-
             break
 
         self.grid.set(*pos, obj)

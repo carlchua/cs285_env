@@ -17,7 +17,7 @@ class DynamicObstaclesEnv(MiniGridEnv):
         self.agent_start_pos = agent_start_pos
         self.agent_start_dir = agent_start_dir
         self.move = False
-
+        self.line_counter = 0
         # Reduce obstacles if there are too many
         self.n_obstacles = int(n_obstacles)
         # if n_obstacles <= size/2 + 1:
@@ -56,6 +56,52 @@ class DynamicObstaclesEnv(MiniGridEnv):
 
         self.mission = "View Every Tile"
 
+    # def step(self, action):
+    #     # Invalid action
+    #     if action >= self.action_space.n:
+    #         action = 0
+
+    #     # Check if there is an obstacle in front of the agent
+    #     front_cell = self.grid.get(*self.front_pos)
+    #     not_clear = front_cell and front_cell.type != 'goal'
+
+    #     # Update obstacle positions
+    #     if self.move:
+    #         for i_obst in range(len(self.obstacles)):
+    #             old_pos = self.obstacles[i_obst].cur_pos
+    #             #UP = (0, -1)
+    #             #RIGHT = (1, 0)
+    #             top = tuple(map(add, old_pos, (1, 0)))
+
+    #             try:
+    #                 new_pos = self.place_obj(self.obstacles[i_obst], top=top, size=(1,1), max_tries=100)
+    #                 self.grid.set(*old_pos, None)
+
+    #                 # If obstacle is at edge, remove and respawn at the side
+    #                 if new_pos[0] >= self.grid.width-2 or new_pos[1] <= 1:
+    #                     # UP moving clouds
+    #                     # self.place_obj(self.obstacles[i_obst], top=(1,self.grid.height-2), size=(self.grid.width-3, 1), max_tries=100)
+
+    #                     # RIGHT moving clouds
+    #                     self.place_obj(self.obstacles[i_obst], top=(1,1), size=(1,self.grid.height-3), max_tries=100)
+    #                     self.grid.set(*new_pos, None)
+    #             except:
+    #                 pass
+    #         self.move = False
+    #     elif not self.move:
+    #         self.move = True
+
+
+    #     # Update the agent's position/direction
+    #     obs, reward, done, info = MiniGridEnv.step(self, action)
+
+    #     # If the agent walked over an obstacle or wall
+    #     if action == self.actions.forward and not_clear:
+    #         # PENALTY FOR COLLISION
+    #         reward = -20
+    #         return obs, reward, done, info
+
+    #     return obs, reward, done, info
     def step(self, action):
         # Invalid action
         if action >= self.action_space.n:
@@ -69,24 +115,41 @@ class DynamicObstaclesEnv(MiniGridEnv):
         if self.move:
             for i_obst in range(len(self.obstacles)):
                 old_pos = self.obstacles[i_obst].cur_pos
+                # print(old_pos)
                 #UP = (0, -1)
                 #RIGHT = (1, 0)
                 top = tuple(map(add, old_pos, (1, 0)))
+                if not self.line_counter or old_pos[0] == 21:
+                    try:
+                        new_pos = self.place_obj_example(self.obstacles[i_obst], top=top, size=(1,1), max_tries=100,line=True,line_example=self.line_counter % 20)
+                        self.grid.set(*old_pos, None)                        
+                        self.line_counter += 1
 
-                try:
-                    new_pos = self.place_obj(self.obstacles[i_obst], top=top, size=(1,1), max_tries=100)
-                    self.grid.set(*old_pos, None)
+                        # If obstacle is at edge, remove and respawn at the side
+                        if new_pos[0] >= self.grid.width-2 or new_pos[1] <= 1:
+                            # UP moving clouds
+                            # self.place_obj(self.obstacles[i_obst], top=(1,self.grid.height-2), size=(self.grid.width-3, 1), max_tries=100)
 
-                    # If obstacle is at edge, remove and respawn at the side
-                    if new_pos[0] >= self.grid.width-2 or new_pos[1] <= 1:
-                        # UP moving clouds
-                        # self.place_obj(self.obstacles[i_obst], top=(1,self.grid.height-2), size=(self.grid.width-3, 1), max_tries=100)
+                            # RIGHT moving clouds
+                            self.place_obj_example(self.obstacles[i_obst], top=(1,1), size=(1,self.grid.height-3), max_tries=100,line=True)
+                            self.grid.set(*new_pos, None)
+                    except:
+                        pass
+                else:
+                    try:
+                        new_pos = self.place_obj_example(self.obstacles[i_obst], top=top, size=(1,1), max_tries=100)
+                        self.grid.set(*old_pos, None)
 
-                        # RIGHT moving clouds
-                        self.place_obj(self.obstacles[i_obst], top=(1,1), size=(1,self.grid.height-3), max_tries=100)
-                        self.grid.set(*new_pos, None)
-                except:
-                    pass
+                        # If obstacle is at edge, remove and respawn at the side
+                        if new_pos[0] >= self.grid.width-2 or new_pos[1] <= 1:
+                            # UP moving clouds
+                            # self.place_obj(self.obstacles[i_obst], top=(1,self.grid.height-2), size=(self.grid.width-3, 1), max_tries=100)
+
+                            # RIGHT moving clouds
+                            self.place_obj_example(self.obstacles[i_obst], top=(1,1), size=(1,self.grid.height-3), max_tries=100)
+                            self.grid.set(*new_pos, None)
+                    except:
+                        pass
             self.move = False
         elif not self.move:
             self.move = True
@@ -125,7 +188,7 @@ class DynamicObstaclesEnv16x16(DynamicObstaclesEnv):
 
 class DynamicObstaclesEnv24x24(DynamicObstaclesEnv):
     def __init__(self):
-        super().__init__(size=24, n_obstacles=25)
+        super().__init__(size=24, n_obstacles=20)
 
 register(
     id='MiniGrid-Dynamic-Obstacles-5x5-v0',
