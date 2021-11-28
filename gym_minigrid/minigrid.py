@@ -860,42 +860,43 @@ class MiniGridEnv(gym.Env):
     def _gen_grid(self, width, height):
         assert False, "_gen_grid needs to be implemented by each environment"
 
-    def _reward(self):
-        reward_val = 0
-        topX, topY, botX, botY = self.get_view_exts()
-        height, width = self.agent_view_size, self.agent_view_size
-        self.curr_grid = [[0]*self.width for _ in range(self.height)]
-        for i in range(height):
-            for j in range(width):
-                x = i + topX
-                y = j + topY
-                if x>=0 and x<self.height and y>=0 and y<self.width:
-                    self.curr_grid[x][y] = 1
-                    # compare prev and curr to search for overlap
-                    if (self.prev_grid[x][y] == 1):
-                        # overlap detected
-                        continue
-                    elif (self.prev_grid[x][y] == 0 ):
-                        # no overlap and new cover ground
-                        if self.seen_grid[x][y] == 1:
-                            reward_val -= 0.5
-                        else:
-                            self.seen_grid[x][y] = 1
-                            reward_val += 3
-                            self.viewed += 1
+    # def _reward(self):
+    #     reward_val = 0
+    #     topX, topY, botX, botY = self.get_view_exts()
+    #     height, width = self.agent_view_size, self.agent_view_size
+    #     self.curr_grid = [[0]*self.width for _ in range(self.height)]
+    #     for i in range(height):
+    #         for j in range(width):
+    #             x = i + topX
+    #             y = j + topY
+    #             if x>=0 and x<self.height and y>=0 and y<self.width:
+    #                 self.curr_grid[x][y] = 1
+    #                 # compare prev and curr to search for overlap
+    #                 if (self.prev_grid[x][y] == 1):
+    #                     # overlap detected
+    #                     continue
+    #                 elif (self.prev_grid[x][y] == 0 ):
+    #                     # no overlap and new cover ground
+    #                     if self.seen_grid[x][y] == 1:
+    #                         reward_val -= 0.5
+    #                     else:
+    #                         self.seen_grid[x][y] = 1
+    #                         reward_val += 3
+    #                         self.viewed += 1
 
-        self.prev_grid = self.curr_grid.copy() # update prev with curr
+    #     self.prev_grid = self.curr_grid.copy() # update prev with curr
 
-        return reward_val
+    #     return reward_val
 
 # ### ONLY ON TOP TILE ###
-#     def _reward(self):
-#         reward_val = 0
-#         if self.covered_grid[self.agent_pos[0]][self.agent_pos[1]] == 1:
-#             reward_val -= 0.5
-#         else:
-#             reward_val += 3
-#         return reward_val
+    def _reward(self):
+        reward_val = 0
+        if self.covered_grid[self.agent_pos[0]][self.agent_pos[1]] == 1:
+            reward_val -= 0.5
+        else:
+            reward_val += 3
+        self.covered_grid[self.agent_pos[0]][self.agent_pos[1]] = 1
+        return reward_val
 
 
 
@@ -999,6 +1000,65 @@ class MiniGridEnv(gym.Env):
                 self._rand_int(top[0], min(top[0] + size[0], self.grid.width)),
                 self._rand_int(top[1], min(top[1] + size[1], self.grid.height))
             ))
+
+            # Don't place the object on top of another object
+            # if self.grid.get(*pos) != None:
+            #     continue
+
+            # Don't place the object where the agent is
+            # if np.array_equal(pos, self.agent_pos):
+            #     continue
+
+            # Check if there is a filtering criterion
+            if reject_fn and reject_fn(self, pos):
+                continue
+
+            break
+
+        self.grid.set(*pos, obj)
+
+        if obj is not None:
+            obj.init_pos = pos
+            obj.cur_pos = pos
+
+        return pos
+
+    def place_obj_example(self,
+        obj,
+        top=None,
+        size=None,
+        reject_fn=None,
+        max_tries=math.inf
+    ):
+        """
+        Place an object at an empty position in the grid
+        :param top: top-left position of the rectangle where to place
+        :param size: size of the rectangle where to place
+        :param reject_fn: function to filter out potential positions
+        """
+
+        if top is None:
+            top = (0, 0)
+        else:
+            top = (max(top[0], 0), max(top[1], 0))
+
+        if size is None:
+            size = (self.grid.width, self.grid.height)
+
+        num_tries = 0
+        while True:
+            # This is to handle with rare cases where rejection sampling
+            # gets stuck in an infinite loop
+            if num_tries > max_tries:
+                raise RecursionError('rejection sampling failed in place_obj')
+
+            num_tries += 1
+            print(top[0],top[1],min(top[0] + size[0], self.grid.width),min(top[1] + size[1], self.grid.height))
+            pos = np.array((
+                self._rand_int(top[0], min(top[0] + size[0], self.grid.width)),
+                self._rand_int(top[1], min(top[1] + size[1], self.grid.height))
+            ))
+            pos = np.array((1,1))
 
             # Don't place the object on top of another object
             # if self.grid.get(*pos) != None:
@@ -1300,7 +1360,8 @@ class MiniGridEnv(gym.Env):
         obs = {
             'image': image,
             'direction': self.agent_dir,
-            'mission': self.mission
+            'mission': self.mission,
+            'view_bit': np.array(self.seen_grid)
         }
 
         return obs
