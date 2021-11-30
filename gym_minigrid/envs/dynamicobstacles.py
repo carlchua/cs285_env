@@ -52,7 +52,10 @@ class DynamicObstaclesEnv(MiniGridEnv):
         self.obstacles = []
         for i_obst in range(self.n_obstacles):
             self.obstacles.append(Ball())
-            self.place_obj(self.obstacles[i_obst], top=(2,2), size=(self.grid.width-4,self.grid.height-4), max_tries=100)
+            if 0 <= i_obst <= 12:
+                self.place_obj(self.obstacles[i_obst], top=(1,i_obst + 2), size=(1,1), max_tries=100)
+            else:
+                self.place_obj(self.obstacles[i_obst], top=(2,2), size=(self.grid.width-4,self.grid.height-4), max_tries=100)
 
         self.mission = "View Every Tile"
 
@@ -81,9 +84,11 @@ class DynamicObstaclesEnv(MiniGridEnv):
                     if new_pos[0] >= self.grid.width-2 or new_pos[1] <= 1:
                         # UP moving clouds
                         # self.place_obj(self.obstacles[i_obst], top=(1,self.grid.height-2), size=(self.grid.width-3, 1), max_tries=100)
-
                         # RIGHT moving clouds
-                        self.place_obj(self.obstacles[i_obst], top=(1,1), size=(1,self.grid.height-3), max_tries=100)
+                        if 0 <= i_obst <= 12:
+                            self.place_obj(self.obstacles[i_obst], top=(1,i_obst + 2), size=(1,1), max_tries=100)
+                        else:
+                            self.place_obj(self.obstacles[i_obst], top=(1,1), size=(1,self.grid.height-3), max_tries=100)
                         self.grid.set(*new_pos, None)
                 except:
                     pass
@@ -121,7 +126,7 @@ class DynamicObstaclesRandomEnv6x6(DynamicObstaclesEnv):
 
 class DynamicObstaclesEnv16x16(DynamicObstaclesEnv):
     def __init__(self):
-        super().__init__(size=16, n_obstacles=8)
+        super().__init__(size=16, n_obstacles=13)
 
 class DynamicObstaclesEnv24x24(DynamicObstaclesEnv):
     def __init__(self):
