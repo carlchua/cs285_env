@@ -678,7 +678,7 @@ class MiniGridEnv(gym.Env):
 
         # Total viewed
         self.viewed = 0
-        # Target to view
+        # Target to view. If using alternate reward, change to (width-2)*(height-2)
         self.target = width*height
 
         # previous seen grid -- 1 if seen else 0
@@ -860,43 +860,43 @@ class MiniGridEnv(gym.Env):
     def _gen_grid(self, width, height):
         assert False, "_gen_grid needs to be implemented by each environment"
 
-    # def _reward(self):
-    #     reward_val = 0
-    #     topX, topY, botX, botY = self.get_view_exts()
-    #     height, width = self.agent_view_size, self.agent_view_size
-    #     self.curr_grid = [[0]*self.width for _ in range(self.height)]
-    #     for i in range(height):
-    #         for j in range(width):
-    #             x = i + topX
-    #             y = j + topY
-    #             if x>=0 and x<self.height and y>=0 and y<self.width:
-    #                 self.curr_grid[x][y] = 1
-    #                 # compare prev and curr to search for overlap
-    #                 if (self.prev_grid[x][y] == 1):
-    #                     # overlap detected
-    #                     continue
-    #                 elif (self.prev_grid[x][y] == 0 ):
-    #                     # no overlap and new cover ground
-    #                     if self.seen_grid[x][y] == 1:
-    #                         reward_val -= 0.5
-    #                     else:
-    #                         self.seen_grid[x][y] = 1
-    #                         reward_val += 3
-    #                         self.viewed += 1
-
-    #     self.prev_grid = self.curr_grid.copy() # update prev with curr
-
-    #     return reward_val
-
-# ### ONLY ON TOP TILE ###
     def _reward(self):
         reward_val = 0
-        if self.covered_grid[self.agent_pos[0]][self.agent_pos[1]] == 1:
-            reward_val -= 0.5
-        else:
-            reward_val += 3
-        self.covered_grid[self.agent_pos[0]][self.agent_pos[1]] = 1
+        topX, topY, botX, botY = self.get_view_exts()
+        height, width = self.agent_view_size, self.agent_view_size
+        self.curr_grid = [[0]*self.width for _ in range(self.height)]
+        for i in range(height):
+            for j in range(width):
+                x = i + topX
+                y = j + topY
+                if x>=0 and x<self.height and y>=0 and y<self.width:
+                    self.curr_grid[x][y] = 1
+                    # compare prev and curr to search for overlap
+                    if (self.prev_grid[x][y] == 1):
+                        # overlap detected
+                        continue
+                    elif (self.prev_grid[x][y] == 0 ):
+                        # no overlap and new cover ground
+                        if self.seen_grid[x][y] == 1:
+                            reward_val -= 0.5
+                        else:
+                            self.seen_grid[x][y] = 1
+                            reward_val += 3
+                            self.viewed += 1
+
+        self.prev_grid = self.curr_grid.copy() # update prev with curr
+
         return reward_val
+
+#### CHANGE SELF.TARGET IF USING THIS ONE ####
+    # def _reward(self):
+    #     reward_val = 0
+    #     if self.covered_grid[self.agent_pos[0]][self.agent_pos[1]] == 1:
+    #         reward_val -= 0.5
+    #     else:
+    #         reward_val += 3
+    #     self.covered_grid[self.agent_pos[0]][self.agent_pos[1]] = 1
+    #     return reward_val
 
 
 
