@@ -679,7 +679,8 @@ class MiniGridEnv(gym.Env):
         # Total viewed
         self.viewed = 0
         # Target to view
-        self.target = width*height
+        # With new reward function, this is (width-2)(height-2), else width*height
+        self.target = (width-2)*(height-2)
 
         # previous seen grid -- 1 if seen else 0
         self.prev_grid = [[0]*width for _ in range(height)]
@@ -893,6 +894,7 @@ class MiniGridEnv(gym.Env):
         reward_val = 0
         if self.covered_grid[self.agent_pos[0]][self.agent_pos[1]] == 1:
             reward_val -= 0.5
+            self.viewed += 1
         else:
             reward_val += 3
         self.covered_grid[self.agent_pos[0]][self.agent_pos[1]] = 1
