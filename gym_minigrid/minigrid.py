@@ -658,7 +658,7 @@ class MiniGridEnv(gym.Env):
         width=None,
         height=None,
         max_steps=100,
-        see_through_walls=False,
+        see_through_walls=True,
         seed=1337,
         agent_view_size=7
     ):
@@ -709,8 +709,6 @@ class MiniGridEnv(gym.Env):
         self.observation_space = spaces.Dict({
             'image': self.observation_space
         })
-
-        # Range of possible rewards
         self.reward_range = (0, 1)
 
         # Window to use for human rendering mode
@@ -1063,7 +1061,6 @@ class MiniGridEnv(gym.Env):
             if line:
                 lst = [[3,1],[3,2],[3,3],[3,4],[3,5],[3,6],[3,7],[3,8],[3,9],[3,10],[3,11],[3,12],[3,13],[3,14],[3,15],[3,16],[3,17],[3,18],[3,19],[3,20]]
                 pos = np.array(lst[line_example])
-                # print("line")
             # Don't place the object on top of another object
             # if self.grid.get(*pos) != None:
             #     continue
@@ -1320,7 +1317,6 @@ class MiniGridEnv(gym.Env):
         """
 
         topX, topY, botX, botY = self.get_view_exts()
-
         grid = self.grid.slice(topX, topY, self.height - 2, self.width - 2)#self.agent_view_size, self.agent_view_size) ##ENTIRE GRID VIEW
 
         for i in range(self.agent_dir + 1):
@@ -1351,7 +1347,6 @@ class MiniGridEnv(gym.Env):
 
         # Encode the partially observable view into a numpy array
         image = grid.encode(vis_mask)
-        # print('image',image.shape)
         assert hasattr(self, 'mission'), "environments must define a textual mission string"
 
         # Observations are dictionaries containing:
@@ -1362,9 +1357,9 @@ class MiniGridEnv(gym.Env):
             'image': image,
             'direction': self.agent_dir,
             'mission': self.mission,
-            'view_bit': np.array(self.seen_grid)
+            'view_bit': np.array(self.seen_grid),
+            'memory_frames': np.zeros(shape=(3,14,14,3))
         }
-
         return obs
 
     def get_obs_render(self, obs, tile_size=TILE_PIXELS//2):
