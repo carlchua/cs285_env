@@ -876,7 +876,7 @@ class MiniGridEnv(gym.Env):
                     elif (self.prev_grid[x][y] == 0 ):
                         # no overlap and new cover ground
                         if self.seen_grid[x][y] == 1:
-                            reward_val -= 0.5
+                            reward_val -= 0
                         else:
                             self.seen_grid[x][y] = 1
                             reward_val += 3
@@ -893,6 +893,7 @@ class MiniGridEnv(gym.Env):
     #         reward_val -= 0.5
     #     else:
     #         reward_val += 3
+    #         self.viewed += 1
     #     self.covered_grid[self.agent_pos[0]][self.agent_pos[1]] = 1
     #     return reward_val
 
