@@ -690,6 +690,9 @@ class MiniGridEnv(gym.Env):
         # current seen grid -- 1 if seen else 0
         self.covered_grid = [[0]*width for _ in range(height)]
 
+        # The initial memory_frames
+        self.memory_frames = np.zeros(shape=(6,height - 2,width - 2,3))
+
         # Actions are discrete integer values
         self.action_space = spaces.Discrete(len(self.actions))
 
@@ -769,8 +772,12 @@ class MiniGridEnv(gym.Env):
         # current seen grid -- 1 if seen else 0
         self.curr_grid = [[0]*self.width for _ in range(self.height)]
 
+        # Add the initial memory_frames
+        self.memory_frames = np.zeros(shape=(6,self.height - 2,self.width - 2,3))
+
         # Return first observation
         obs = self.gen_obs()
+
         return obs
 
     def seed(self, seed=1337):
@@ -792,6 +799,7 @@ class MiniGridEnv(gym.Env):
 
     @property
     def steps_remaining(self):
+        # print('===',self.max_steps - self.step_count)
         return self.max_steps - self.step_count
 
     def __str__(self):
@@ -1354,12 +1362,17 @@ class MiniGridEnv(gym.Env):
         # - an image (partially observable view of the environment)
         # - the agent's direction/orientation (acting as a compass)
         # - a textual mission string (instructions for the agent)
+        assert self.memory_frames.shape == (6,self.height - 2, self.width - 2, 3)
+        temp_queue = list(self.memory_frames)
+        temp_queue.pop(0)
+        temp_queue.append(image)
+        self.memory_frames = np.array(temp_queue,dtype=object)
         obs = {
             'image': image,
             'direction': self.agent_dir,
             'mission': self.mission,
             'view_bit': np.array(self.seen_grid),
-            'memory_frames': np.zeros(shape=(3,14,14,3))
+            'memory_frames': self.memory_frames
         }
         return obs
 
