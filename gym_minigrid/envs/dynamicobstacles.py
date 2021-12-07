@@ -101,6 +101,13 @@ class DynamicObstaclesEnv(MiniGridEnv):
             reward = -20
             return obs, reward, done, info
 
+        # If agent is hit by obstacle (obstacles moving right, hit agent from the left)
+        left_cell = self.grid.get(*self.left_pos)
+        not_clear = left_cell
+        if action != self.actions.forward and not_clear:
+            reward = -20
+            return obs, reward, done, info
+
         return obs, reward, done, info
 
 class DynamicObstaclesEnv5x5(DynamicObstaclesEnv):
