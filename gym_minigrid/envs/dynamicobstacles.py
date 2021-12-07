@@ -125,7 +125,7 @@ class DynamicObstaclesEnv16x16(DynamicObstaclesEnv):
 
 class DynamicObstaclesEnv24x24(DynamicObstaclesEnv):
     def __init__(self):
-        super().__init__(size=24, n_obstacles=0)
+        super().__init__(size=24, n_obstacles=25)
 
 register(
     id='MiniGrid-Dynamic-Obstacles-5x5-v0',
